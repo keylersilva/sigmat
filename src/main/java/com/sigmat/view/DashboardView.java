@@ -6,6 +6,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -33,10 +34,6 @@ public class DashboardView extends VerticalLayout {
         setSizeFull();
         setPadding(false);
         setSpacing(false);
-        getElement().getStyle()
-            .set("background", "#111827")
-            .set("min-height", "100vh")
-            .set("color", "#ffffff");
 
         if (!SesionManager.getInstancia().estaAutenticado()) {
             getUI().ifPresent(ui -> ui.navigate(""));
@@ -48,9 +45,7 @@ public class DashboardView extends VerticalLayout {
         statsContainer.setPadding(true);
         statsContainer.setSpacing(true);
         statsContainer.setWidth("100%");
-        statsContainer.getElement().getStyle()
-            .set("background", "#111827")
-            .set("min-height", "calc(100vh - 80px)");
+        statsContainer.setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.STRETCH);
         add(statsContainer);
 
         statsContainer.add(crearStatsFallback());
@@ -60,16 +55,16 @@ public class DashboardView extends VerticalLayout {
     private Div crearHeader() {
         Div header = new Div();
         header.getElement().getStyle()
-            .set("background", "#1f2937")
+            .set("background", "#ffffff")
             .set("padding", "20px 24px")
-            .set("border-bottom", "1px solid #374151")
+            .set("border-bottom", "1px solid #e2e8f0")
             .set("display", "flex")
             .set("justify-content", "space-between")
             .set("align-items", "center");
 
         H1 titulo = new H1("Dashboard");
         titulo.getElement().getStyle()
-            .set("color", "#ffffff")
+            .set("color", "#1e293b")
             .set("font-size", "28px")
             .set("font-weight", "700")
             .set("margin", "0");
@@ -143,10 +138,10 @@ public class DashboardView extends VerticalLayout {
     private Div crearStatCard(String label, String value, VaadinIcon icono, String colorIcon, String colorBg) {
         Div card = new Div();
         card.getElement().getStyle()
-            .set("background", "#1f2937")
+            .set("background", "#ffffff")
             .set("border-radius", "12px")
             .set("padding", "20px")
-            .set("border", "1px solid #374151")
+            .set("border", "1px solid #e2e8f0")
             .set("display", "flex")
             .set("flex-direction", "column")
             .set("gap", "12px");
@@ -174,7 +169,7 @@ public class DashboardView extends VerticalLayout {
         Div valueArea = new Div();
         Paragraph valor = new Paragraph(value);
         valor.getElement().getStyle()
-            .set("color", "#ffffff")
+            .set("color", "#1e293b")
             .set("font-size", "24px")
             .set("font-weight", "700")
             .set("margin", "0");
@@ -202,11 +197,11 @@ public class DashboardView extends VerticalLayout {
         Div cardHeader = new Div();
         cardHeader.getElement().getStyle()
             .set("padding", "16px 20px")
-            .set("border-bottom", "1px solid #374151");
+            .set("border-bottom", "1px solid #e2e8f0");
 
         H3 tituloSeccion = new H3("Análisis de Migración");
         tituloSeccion.getElement().getStyle()
-            .set("color", "#ffffff")
+            .set("color", "#1e293b")
             .set("font-size", "16px")
             .set("font-weight", "600")
             .set("margin", "0");
@@ -224,8 +219,7 @@ public class DashboardView extends VerticalLayout {
             HorizontalLayout cardsLayout = new HorizontalLayout();
             cardsLayout.getElement().getStyle()
                 .set("display", "flex")
-                .set("gap", "16px")
-                .set("width", "100%");
+                .set("gap", "16px");
 
             for (int i = 0; i < Math.min(recomendaciones.size(), 3); i++) {
                 RecomendacionMigracionDTO rec = recomendaciones.get(i);
@@ -248,7 +242,7 @@ public class DashboardView extends VerticalLayout {
             default -> "#22c55e";
         };
         card.getElement().getStyle()
-            .set("background", "#374151")
+            .set("background", "#f8fafc")
             .set("border-radius", "8px")
             .set("padding", "16px")
             .set("border-left", "4px solid " + borderColor)
@@ -256,7 +250,7 @@ public class DashboardView extends VerticalLayout {
 
         H3 nombre = new H3(rec.getNombreConductor());
         nombre.getElement().getStyle()
-            .set("color", "#ffffff")
+            .set("color", "#1e293b")
             .set("font-size", "16px")
             .set("margin", "0 0 8px 0");
 
@@ -300,20 +294,20 @@ public class DashboardView extends VerticalLayout {
     private void crearTablaResumen(List<Conductor> conductores) {
         Div section = new Div();
         section.getElement().getStyle()
-            .set("background", "#1f2937")
+            .set("background", "#ffffff")
             .set("border-radius", "12px")
-            .set("border", "1px solid #374151")
+            .set("border", "1px solid #e2e8f0")
             .set("margin", "24px")
             .set("overflow", "hidden");
 
         Div cardHeader = new Div();
         cardHeader.getElement().getStyle()
             .set("padding", "16px 20px")
-            .set("border-bottom", "1px solid #374151");
+            .set("border-bottom", "1px solid #e2e8f0");
 
         H3 titulo = new H3("Conductores Recientes");
         titulo.getElement().getStyle()
-            .set("color", "#ffffff")
+            .set("color", "#1e293b")
             .set("font-size", "16px")
             .set("font-weight", "600")
             .set("margin", "0");
@@ -322,11 +316,7 @@ public class DashboardView extends VerticalLayout {
 
         Grid<Conductor> grid = new Grid<>();
         grid.setItems(conductores);
-        grid.setWidth("100%");
         grid.setHeight("300px");
-        grid.getElement().getStyle()
-            .set("background", "#1f2937")
-            .set("--vaadin-grid-background", "#1f2937");
 
         grid.addColumn(Conductor::getNombre).setHeader("Nombre").setSortable(true);
         grid.addColumn(Conductor::getCedula).setHeader("Cédula").setSortable(true);

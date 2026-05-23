@@ -34,8 +34,6 @@ public class VehiculosView extends VerticalLayout {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
-        getElement().getStyle().set("background", "#1e1e1e");
-        addClassName("page-content");
 
         if (!SesionManager.getInstancia().estaAutenticado()) {
             getUI().ifPresent(ui -> ui.navigate(""));
@@ -44,7 +42,11 @@ public class VehiculosView extends VerticalLayout {
 
         add(crearHeader());
         add(crearToolbar());
-        add(crearGrid());
+
+        crearGrid();
+        add(gridVehiculos);
+        expand(gridVehiculos);
+
         cargarVehiculos();
     }
 
@@ -89,13 +91,9 @@ public class VehiculosView extends VerticalLayout {
         return toolbar;
     }
 
-    private Div crearGrid() {
-        Div gridContainer = new Div();
-        gridContainer.addClassName("modern-card");
-
+    private void crearGrid() {
         gridVehiculos = new Grid<>();
-        gridVehiculos.setWidth("100%");
-        gridVehiculos.setHeight("500px");
+        gridVehiculos.setSizeFull();
 
         gridVehiculos.addColumn(Vehiculo::getTipoVehiculo).setHeader("Tipo").setSortable(true).setWidth("130px");
         gridVehiculos.addColumn(Vehiculo::getPlaca).setHeader("Placa").setSortable(true).setWidth("120px");
@@ -112,21 +110,14 @@ public class VehiculosView extends VerticalLayout {
                 default -> "inactivo";
             };
             badge.addClassName(badgeClass);
-            badge.add(new Paragraph(estado.replace("_", " ")));
+            badge.add(new Paragraph(estado != null ? estado.replace("_", " ") : ""));
             return badge;
         }).setHeader("Estado").setWidth("140px");
         gridVehiculos.addColumn(Vehiculo::getObservaciones).setHeader("Observaciones").setFlexGrow(1);
         gridVehiculos.addComponentColumn(this::crearBotonesAccion).setHeader("Acciones").setWidth("160px");
 
-        Div cardBody = new Div();
-        cardBody.addClassName("card-body");
-        cardBody.add(gridVehiculos);
-
-        gridContainer.add(cardBody);
         dialogFormulario = new Dialog();
         dialogFormulario.setWidth("600px");
-
-        return gridContainer;
     }
 
     private HorizontalLayout crearBotonesAccion(Vehiculo vehiculo) {

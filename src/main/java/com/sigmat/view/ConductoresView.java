@@ -1,5 +1,6 @@
 package com.sigmat.view;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -19,6 +20,8 @@ import com.vaadin.flow.router.Route;
 import com.sigmat.controller.SigmatController;
 import com.sigmat.model.Conductor;
 import com.sigmat.utils.SesionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.List;
 @Route(value = "conductores", layout = MainLayout.class)
 public class ConductoresView extends VerticalLayout {
 
+    private static final Logger logger = LoggerFactory.getLogger(ConductoresView.class);
     private final SigmatController controller;
     private Grid<Conductor> gridConductores;
     private TextField campoBusqueda;
@@ -37,7 +41,6 @@ public class ConductoresView extends VerticalLayout {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
-        getElement().getStyle().set("background", "#1e1e1e");
         addClassName("page-content");
 
         if (!SesionManager.getInstancia().estaAutenticado()) {
@@ -47,7 +50,13 @@ public class ConductoresView extends VerticalLayout {
 
         add(crearHeader());
         add(crearToolbar());
-        add(crearGrid());
+        crearGrid();
+        add(gridConductores);
+        expand(gridConductores);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
         cargarConductores();
     }
 
@@ -92,46 +101,17 @@ public class ConductoresView extends VerticalLayout {
         return toolbar;
     }
 
-    private Div crearGrid() {
-        Div gridContainer = new Div();
-        gridContainer.addClassName("modern-card");
-
+    private void crearGrid() {
         gridConductores = new Grid<>();
-        gridConductores.setWidth("100%");
-        gridConductores.setHeight("500px");
-
-        gridConductores.addColumn(Conductor::getNombre).setHeader("Nombre").setSortable(true).setFlexGrow(1);
-        gridConductores.addColumn(Conductor::getCedula).setHeader("Cédula").setSortable(true).setWidth("130px");
-        gridConductores.addColumn(Conductor::getTelefono).setHeader("Teléfono").setWidth("120px");
-        gridConductores.addColumn(Conductor::getDireccion).setHeader("Dirección").setFlexGrow(1);
-        gridConductores.addColumn(Conductor::getTipoVehiculo).setHeader("Tipo").setWidth("130px");
-        gridConductores.addColumn(c -> "$" + String.format("%,.0f", c.getIngresosDiarios())).setHeader("Ingresos").setWidth("120px");
-        gridConductores.addColumn(c -> {
-            String estado = c.getEstado();
-            Div badge = new Div();
-            badge.addClassName("status-badge");
-            String badgeClass = switch (estado) {
-                case "ACTIVO" -> "activo";
-                case "MIGRADO" -> "migrado";
-                case "EN_MIGRACION" -> "en_migracion";
-                default -> "inactivo";
-            };
-            badge.addClassName(badgeClass);
-            badge.add(new Paragraph(estado));
-            return badge;
-        }).setHeader("Estado").setWidth("120px");
+        gridConductores.setSizeFull();
+        gridConductores.addColumn(Conductor::getNombre).setHeader("Nombre").setSortable(true);
+        gridConductores.addColumn(Conductor::getCedula).setHeader("Cédula").setSortable(true);
+        gridConductores.addColumn(Conductor::getTelefono).setHeader("Teléfono");
+        gridConductores.addColumn(Conductor::getEstado).setHeader("Estado");
         gridConductores.addComponentColumn(this::crearBotonesAccion).setHeader("Acciones").setWidth("200px");
 
-        Div cardBody = new Div();
-        cardBody.addClassName("card-body");
-        cardBody.add(gridConductores);
-
-        gridContainer.add(cardBody);
         dialogFormulario = new Dialog();
         dialogFormulario.setWidth("600px");
-        dialogFormulario.getElement().getStyle().set("border-radius", "16px");
-
-        return gridContainer;
     }
 
     private HorizontalLayout crearBotonesAccion(Conductor conductor) {
@@ -411,7 +391,13 @@ public class ConductoresView extends VerticalLayout {
 
     private void cargarConductores() {
         controller.listarConductores().thenAccept(conductores -> {
-            getUI().ifPresent(ui -> ui.access(() -> gridConductores.setItems(conductores)));
+            getUI().ifPresent(ui -> ui.access(() -> {
+                gridConductores.setItems(conductores);
+                logger.info("Conductores cargados: {}", conductores.size());
+            }));
+        }).exceptionally(ex -> {
+            logger.error("Error cargando conductores", ex);
+            return null;
         });
     }
 }

@@ -114,12 +114,12 @@ public class Conductor extends BaseModel {
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
-        map.put("nombre", nombre);
+        map.put("nombreCompleto", nombre);
         map.put("cedula", cedula);
         map.put("telefono", telefono);
         map.put("direccion", direccion);
         map.put("tipoVehiculo", tipoVehiculo);
-        map.put("ingresosDiarios", ingresosDiarios);
+        map.put("ingresosMensuales", ingresosDiarios);
         map.put("estado", estado);
         map.put("fechaRegistro", fechaRegistro != null ? fechaRegistro.toString() : null);
         map.put("observaciones", observaciones);

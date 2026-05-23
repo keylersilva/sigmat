@@ -27,10 +27,9 @@ public class ReportesView extends VerticalLayout {
 
     public ReportesView(SigmatController controller) {
         this.controller = controller;
-        setSizeFull();
+        setWidthFull();
         setPadding(true);
         setSpacing(true);
-        getElement().getStyle().set("background", "#1e1e1e");
         addClassName("page-content");
 
         if (!SesionManager.getInstancia().estaAutenticado()) {
