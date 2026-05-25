@@ -34,55 +34,44 @@ const router = {
     }
 };
 
-// ClickHandler for vaadin-router-go event is copied from vaadin/router click.js
 // @ts-ignore
 function getAnchorOrigin(anchor) {
-    // IE11: on HTTP and HTTPS the default port is not included into
-    // window.location.origin, so won't include it here either.
     const port = anchor.port;
     const protocol = anchor.protocol;
     const defaultHttp = protocol === 'http:' && port === '80';
     const defaultHttps = protocol === 'https:' && port === '443';
     const host = (defaultHttp || defaultHttps)
-        ? anchor.hostname // does not include the port number (e.g. www.example.org)
-        : anchor.host; // does include the port number (e.g. www.example.org:80)
+        ? anchor.hostname
+        : anchor.host;
     return `${protocol}//${host}`;
 }
 
 function normalizeURL(url: URL): void | string {
-    // ignore click if baseURI does not match the document (external)
     if (!url.href.startsWith(document.baseURI)) {
         return;
     }
-
-    // Normalize path against baseURI
     return '/' + url.href.slice(document.baseURI.length);
 }
 
 function extractPath(event: MouseEvent): void | string {
-    // ignore the click if the default action is prevented
     if (event.defaultPrevented) {
         return;
     }
 
-    // ignore the click if not with the primary mouse button
     if (event.button !== 0) {
         return;
     }
 
-    // ignore the click if a modifier key is pressed
     if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
         return;
     }
 
-    // find the <a> element that the click is at (or within)
     let maybeAnchor = event.target;
     const path = event.composedPath
         ? event.composedPath()
         // @ts-ignore
         : (event.path || []);
 
-    // example to check: `for...of` loop here throws the "Not yet implemented" error
     for (let i = 0; i < path.length; i++) {
         const target = path[i];
         if (target.nodeName && target.nodeName.toLowerCase() === 'a') {
@@ -97,7 +86,6 @@ function extractPath(event: MouseEvent): void | string {
         maybeAnchor = maybeAnchor.parentNode;
     }
 
-    // ignore the click if not at an <a> element
     // @ts-ignore
     if (!maybeAnchor || maybeAnchor.nodeName.toLowerCase() !== 'a') {
         return;
@@ -105,30 +93,24 @@ function extractPath(event: MouseEvent): void | string {
 
     const anchor = maybeAnchor as HTMLAnchorElement;
 
-    // ignore the click if the <a> element has a non-default target
     if (anchor.target && anchor.target.toLowerCase() !== '_self') {
         return;
     }
 
-    // ignore the click if the <a> element has the 'download' attribute
     if (anchor.hasAttribute('download')) {
         return;
     }
 
-    // ignore the click if the <a> element has the 'router-ignore' attribute
     if (anchor.hasAttribute('router-ignore')) {
         return;
     }
 
-    // ignore the click if the target URL is a fragment on the current page
     if (anchor.pathname === window.location.pathname && anchor.hash !== '') {
         // @ts-ignore
         window.location.hash = anchor.hash;
         return;
     }
 
-    // ignore the click if the target is external to the app
-    // In IE11 HTMLAnchorElement does not have the `origin` property
     // @ts-ignore
     const origin = anchor.origin || getAnchorOrigin(anchor);
     if (origin !== window.location.origin) {
@@ -138,11 +120,6 @@ function extractPath(event: MouseEvent): void | string {
     return normalizeURL(new URL(anchor.href, anchor.baseURI));
 }
 
-/**
- * Fire 'vaadin-navigated' event to inform components of navigation.
- * @param pathname pathname of navigation
- * @param search search of navigation
- */
 function fireNavigated(pathname:string, search: string) {
     setTimeout(() =>
         window.dispatchEvent(new CustomEvent('vaadin-navigated', {
@@ -241,7 +218,6 @@ function Flow() {
             const routes = ((window as any)?.Vaadin?.routesConfig || []) as AgnosticRouteObject[];
             let matched = matchRoutes(Array.from(routes), window.location.pathname);
 
-            // Navigation between server routes
             // @ts-ignore
             if (matched && matched.filter(path => path.route?.element?.type?.name === Flow.name).length != 0) {
                 containerRef.current?.onBeforeEnter?.call(containerRef?.current,
@@ -257,14 +233,12 @@ function Flow() {
                     }, router);
                 navigated.current = true;
             } else {
-                // For covering the 'server -> client' use case
                 Promise.resolve(containerRef.current?.onBeforeLeave?.call(containerRef?.current, {
                     pathname,
                     search
                 }, {prevent}, router))
                     .then((cmd: unknown) => {
                         if (cmd === postpone && containerRef.current) {
-                            // postponed navigation: expose existing blocker to Flow
                             containerRef.current.serverConnected = (cancel) => {
                                 if (cancel) {
                                     blocker.reset();
@@ -274,7 +248,6 @@ function Flow() {
                                 }
                             }
                         } else {
-                            // permitted navigation: proceed with the blocker
                             blocker.proceed();
                             window.removeEventListener('click',  navigateEventHandler);
                         }
@@ -315,13 +288,6 @@ export const serverSideRoutes = [
     { path: '/*', element: <Flow/> },
 ];
 
-/**
- * Load the script for an exported WebComponent with the given tag
- *
- * @param tag name of the exported web-component to load
- *
- * @returns Promise(resolve, reject) that is fulfilled on script load
- */
 export const loadComponentScript = (tag: String): Promise<void> => {
     return new Promise((resolve, reject) => {
         useEffect(() => {
@@ -346,14 +312,6 @@ interface Properties {
     [key: string]: string;
 }
 
-/**
- * Load WebComponent script and create a React element for the WebComponent.
- *
- * @param tag custom web-component tag name.
- * @param props optional Properties object to create element attributes with
- * @param onload optional callback to be called for script onload
- * @param onerror optional callback for error loading the script
- */
 export const reactElement = (tag: string, props?: Properties, onload?: () => void, onerror?: (err:any) => void) => {
     loadComponentScript(tag).then(() => onload?.(), (err) => {
         if(onerror) {
@@ -375,10 +333,6 @@ export default Flow;
 if (import.meta.hot) {
   // @ts-ignore
   import.meta.hot.accept((newModule) => {
-    // A hot module replace for Flow.tsx happens when any JS/TS imported through @JsModule
-    // or similar is updated because this updates generated-flow-imports.js and that in turn
-    // is imported by this file. We have no means of hot replacing those files, e.g. some
-    // custom lit element so we need to reload the page. */
     if (newModule) {
       window.location.reload();
     }

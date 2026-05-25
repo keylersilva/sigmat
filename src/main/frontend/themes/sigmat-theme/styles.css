@@ -54,9 +54,6 @@ vaadin-grid {
 .status-badge.en_migracion { background: #ffedd5; color: #c2410c; }
 .status-badge.inactivo { background: #f1f5f9; color: #64748b; }
 
-/* ========================================
-   ESTILOS DEL LOGIN
-   ======================================== */
 .login-container {
     min-height: 100vh;
     width: 100vw;
