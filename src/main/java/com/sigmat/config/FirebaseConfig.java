@@ -24,64 +24,37 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() {
-
         try {
-
             logger.info("Iniciando Firebase...");
 
-            InputStream serviceAccount =
-                    getClass()
-                            .getClassLoader()
-                            .getResourceAsStream(
-                                    "firebase-service-account.json"
-                            );
+            InputStream serviceAccount = getClass().getClassLoader()
+                    .getResourceAsStream("firebase-service-account.json");
 
             if (serviceAccount == null) {
-
-                logger.error(
-                        "NO se encontró firebase-service-account.json"
-                );
-
+                logger.error("NO se encontró firebase-service-account.json");
                 return;
             }
 
             logger.info("Archivo JSON encontrado");
 
-            FirebaseOptions options =
-                    FirebaseOptions.builder()
-                            .setCredentials(
-                                    GoogleCredentials.fromStream(
-                                            serviceAccount
-                                    )
-                            )
-                            .build();
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
-
                 FirebaseApp.initializeApp(options);
-
-                logger.info(
-                        "FirebaseApp inicializado"
-                );
+                logger.info("FirebaseApp inicializado");
             }
 
             firestore = FirestoreClient.getFirestore();
-
-            logger.info(
-                    "Firestore conectado correctamente"
-            );
+            logger.info("Firestore conectado correctamente");
 
         } catch (Exception e) {
-
-            logger.error(
-                    "ERROR REAL FIREBASE:",
-                    e
-            );
+            logger.error("ERROR REAL FIREBASE:", e);
         }
     }
 
     public static Firestore getFirestore() {
-
         return firestore;
     }
 }
